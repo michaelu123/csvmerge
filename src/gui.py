@@ -24,7 +24,7 @@ class FileSelector(Frame):
     def __init__(self, master, labeltext, **kw):
         super().__init__(master)
         self.labeltext = labeltext
-        self.label = Label(self, text=labeltext, width="15")
+        self.label = Label(self, text=labeltext, width="16", anchor="w")
         self.svar = StringVar()
         self.entry = Entry(self, textvariable=self.svar,
                            width=50, borderwidth=2, **kw)
@@ -33,7 +33,7 @@ class FileSelector(Frame):
         # self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
         self.label.grid(row=0, column=0, sticky="w")
-        self.entry.grid(row=0, column=1, sticky="we", padx=5, pady=5)
+        self.entry.grid(row=0, column=1, sticky="we", padx=5, pady=10)
         self.btn.grid(row=0, column=2, sticky="e")
 
     def get(self):
@@ -61,6 +61,7 @@ class Gui:
         self.task = task
         self.cont = False
         self.logName = "csvmerge"
+        self.rbVal = StringVar()
         # root = customtkinter.CTk()
         root.columnconfigure(0, weight=1)
         root.rowconfigure(0, weight=1)
@@ -72,22 +73,32 @@ class Gui:
         c.rowconfigure(1, weight=1)
         c.columnconfigure(0, weight=1)
 
-        self.fs1 = FileSelector(c, "Datei 1")
-        self.fs2 = FileSelector(c, "Datei 2")
+        self.fsH = FileSelector(c, "Hauptmitglieder")
+        self.fsF = FileSelector(c, "Familienmitglieder")
         self.fsOut = FileSelector(c, "Ausgabedatei")
-        self.fs1.grid(column=0, row=0, sticky="we")
-        self.fs2.grid(column=0, row=1, sticky="we")
+        self.fsH.grid(column=0, row=0, sticky="we")
+        self.fsF.grid(column=0, row=1, sticky="we")
         self.fsOut.grid(column=0, row=2, sticky="we")
 
-        self.fs1.set(
-            "C:/Users/Michael/PythonProjects/csvmerge/Heruntergeladen Hauptmitglieder.csv")
-        self.fs2.set(
-            "C:/Users/Michael/PythonProjects/csvmerge/Heruntergeladen Familienmitglieder.csv")
-        self.fsOut.set("out.csv")
+        # self.fsH.set(
+        #     "C:/Users/Michael/PythonProjects/csvmerge/Heruntergeladen Hauptmitglieder.csv")
+        # self.fsF.set(
+        #     "C:/Users/Michael/PythonProjects/csvmerge/Heruntergeladen Familienmitglieder.csv")
+        # self.fsOut.set("out.csv")
 
-        btn1 = Button(c, text="Start", command=lambda: self.run(), bg="red")
-        btn1.grid(column=0, row=3, columnspan=3, pady=10)
+        b = ttk.Frame(c)
+        b.grid(column=0, row=3, sticky=(N, W, E, S))
+        btnr1 = Radiobutton(b, text="Versand an Hauptmitglieder", value="h",
+                            variable=self.rbVal)
+        btnr2 = Radiobutton(b, text="Versand an Familienmitglieder", value="f",
+                            variable=self.rbVal)
+        btnr1.select()
+        btn1 = Button(b, text="Start", command=lambda: self.run(), bg="red")
         self.btn = btn1
+        btnr1.grid(column=0, row=0, pady=10, sticky="w")
+        btnr2.grid(column=1, row=0, pady=10, sticky="w")
+        btn1.grid(column=2, row=0, padx=20, pady=10, sticky="we")
+        b.columnconfigure(2, weight=1)
 
         textContainer = ttk.Frame(root, borderwidth=2, relief="sunken")
         text = Text(textContainer, wrap="none", borderwidth=0,
@@ -118,8 +129,7 @@ class Gui:
         if self.cont:
             self.root.after(0, lambda: self.step())
         else:
-            log(self.logName, self.msgs)
-            print("msgs", self.msgs)
+            # log(self.logName, self.msgs)
             self.btn.configure(state=NORMAL, background="red")
             print("Fertig!")
 
@@ -127,9 +137,10 @@ class Gui:
         try:
             self.text.delete("1.0", END)
             self.btn.configure(state=DISABLED, background="white")
-            self.msgs = "???"
+            self.msgs = ""
             self.task.setFiles(
-                self.fs1.get(), self.fs2.get(), self.fsOut.get())
+                self.fsH.get(), self.fsF.get(), self.fsOut.get())
+            self.task.setMode(self.rbVal.get())
             self.step()
         except Exception as e:
             print("Exception", e)

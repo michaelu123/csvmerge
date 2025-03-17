@@ -1,6 +1,16 @@
 from csvRW import *
 
 
+def name(row):
+    return row["VORNAME"] + " " + row["NAME"] + ", " + row["MITGLIEDSNR"]
+
+
+def toHNr(s):
+    if len(s) > 2:
+        return s[0:len(s)-2] + "00"
+    return s
+
+
 class Task:
     def __init__(self, stop):
         self.start = 0
@@ -22,31 +32,67 @@ class Task:
 class CsvTask(Task):
     def __init__(self):
         super().__init__(3)
+        self.hmap = {}
 
-    def setFiles(self, file1Path, file2Path, fileOutPath):
-        self.file1Path = file1Path
-        self.file2Path = file2Path
+    def setFiles(self, fileHPath, fileFPath, fileOutPath):
+        self.fileHPath = fileHPath
+        self.fileFPath = fileFPath
         self.fileOutPath = fileOutPath
+
+    def setMode(self, mode):
+        self.mode = mode
 
     def stepi(self, curr):
         if curr == 0:
-            with open(self.file1Path, "r", encoding="utf-8-sig") as csv1file:
-                csvReader = CsvReader(csv1file)
-                self.file1Rows = csvReader.read()
-            print("File1 gelesen:", len(self.file1Rows), "Einträge gelesen")
+            with open(self.fileHPath, "r", encoding="utf-8-sig") as csvHfile:
+                csvReader = CsvReader(csvHfile)
+                self.fileHRows = csvReader.read()
+            for row in self.fileHRows:
+                self.hmap[row["MITGLIEDSNR"]] = row
+            print("Hauptmitglieder:", len(self.fileHRows), "Einträge gelesen")
             return
         if curr == 1:
-            with open(self.file2Path, "r", encoding="utf-8-sig") as csv2file:
-                csvReader = CsvReader(csv2file)
-                self.file2Rows = csvReader.read()
-            print("File2 gelesen:", len(self.file2Rows), "Einträge gelesen")
+            with open(self.fileFPath, "r", encoding="utf-8-sig") as csvFfile:
+                csvReader = CsvReader(csvFfile)
+                self.fileFRows = csvReader.read()
+            print("Familienmitglieder:", len(
+                self.fileFRows), "Einträge gelesen")
             return
         if curr == 2:
-            print("File1", self.file1Rows)
-            print("File2", self.file2Rows)
             with open(self.fileOutPath, "w", encoding="utf-8-sig") as csvOutfile:
                 csvWriter = CsvWriter(csvOutfile)
-                csvWriter.write(self.file1Rows[0])
-                csvWriter.write(self.file2Rows[0])
-            print("FileOut geschrieben")
+                if self.mode == "h":
+                    rows = self.hrows()
+                else:
+                    rows = self.frows()
+                for row in rows:
+                    csvWriter.write(row)
+            print("Ausgabedatei geschrieben, ", len(rows), "Einträge")
             return
+
+    def hrows(self):
+        for hrow in self.fileHRows:
+            if not hrow["EMAIL"]:
+                hrow["MITGLIEDSNR"] += " @H"
+        for frow in self.fileFRows:
+            if not frow["EMAIL"]:
+                hnr = toHNr(frow["MITGLIEDSNR"])
+                hrow = self.hmap[hnr]
+                if not hrow:
+                    print("Kein Hauptmitglied für ", self.name(frow))
+                    continue
+                if "@F" not in hrow["MITGLIEDSNR"]:
+                    hrow["MITGLIEDSNR"] += " @F"
+        return self.fileHRows
+
+    def frows(self):
+        for frow in self.fileFRows:
+            if not frow["EMAIL"]:
+                hnr = toHNr(frow["MITGLIEDSNR"])
+                hrow = self.hmap[hnr]
+                if not hrow:
+                    print("Kein Hauptmitglied für ", self.name(frow))
+                    continue
+                if hrow["EMAIL"]:
+                    frow["EMAIL2"] = hrow["EMAIL"]
+        return self.fileFRows

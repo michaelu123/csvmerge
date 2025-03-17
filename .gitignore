@@ -2,3 +2,6 @@
 **/logs
 **/*.csv
 xxx*
+*.exe
+src/main.dist/*
+src/nuitka.txt

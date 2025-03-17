@@ -43,6 +43,7 @@ class CsvWriter:
             "TELEFON2",
             "MOBIL",
             "EMAIL",
+            "EMAIL2",
             "LV",
             "KV",
             "OG",
