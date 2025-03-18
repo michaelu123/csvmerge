@@ -29,6 +29,7 @@ class CsvWriter:
     def __init__(self, f):
         self.fieldNames = [
             "MITGLIEDSNR",
+            "@MH@MF",
             "TITEL",
             "VORNAME",
             "ADEL",

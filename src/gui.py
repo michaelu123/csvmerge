@@ -21,9 +21,13 @@ class TxtWriter:
 
 
 class FileSelector(Frame):
-    def __init__(self, master, labeltext, **kw):
+    bits = 0
+    btn = None
+
+    def __init__(self, master, labeltext, bit, **kw):
         super().__init__(master)
         self.labeltext = labeltext
+        self.bit = bit
         self.label = Label(self, text=labeltext, width="16", anchor="w")
         self.svar = StringVar()
         self.entry = Entry(self, textvariable=self.svar,
@@ -40,7 +44,14 @@ class FileSelector(Frame):
         return self.svar.get()
 
     def set(self, s):
-        return self.svar.set(s)
+        self.svar.set(s)
+        FileSelector.bits |= self.bit
+        if FileSelector.bits == 7:
+            FileSelector.btn.configure(state="normal", background="red")
+
+    @staticmethod
+    def setBtn(btn):
+        FileSelector.btn = btn
 
     def selectFile(self):
         if self.labeltext == "Ausgabedatei":
@@ -52,6 +63,7 @@ class FileSelector(Frame):
                 title="Datei auswählen",
                 defaultextension=".csv", filetypes=[("CSV", ".csv")])
         self.svar.set(self.fileName)
+        self.set(self.fileName)
 
 
 class Gui:
@@ -60,7 +72,7 @@ class Gui:
         self.root = root
         self.task = task
         self.cont = False
-        self.logName = "csvmerge"
+        self.logName = "MIX_MH_MF"
         self.rbVal = StringVar()
         # root = customtkinter.CTk()
         root.columnconfigure(0, weight=1)
@@ -73,9 +85,9 @@ class Gui:
         c.rowconfigure(1, weight=1)
         c.columnconfigure(0, weight=1)
 
-        self.fsH = FileSelector(c, "Hauptmitglieder")
-        self.fsF = FileSelector(c, "Familienmitglieder")
-        self.fsOut = FileSelector(c, "Ausgabedatei")
+        self.fsH = FileSelector(c, "Hauptmitglieder", 1)
+        self.fsF = FileSelector(c, "Familienmitglieder", 2)
+        self.fsOut = FileSelector(c, "Ausgabedatei", 4)
         self.fsH.grid(column=0, row=0, sticky="we")
         self.fsF.grid(column=0, row=1, sticky="we")
         self.fsOut.grid(column=0, row=2, sticky="we")
@@ -93,8 +105,10 @@ class Gui:
         btnr2 = Radiobutton(b, text="Versand an Familienmitglieder", value="f",
                             variable=self.rbVal)
         btnr1.select()
-        btn1 = Button(b, text="Start", command=lambda: self.run(), bg="red")
+        btn1 = Button(b, text="Start", command=lambda: self.run(),
+                      bg="grey", state="disabled")
         self.btn = btn1
+        FileSelector.setBtn(btn1)
         btnr1.grid(column=0, row=0, pady=10, sticky="w")
         btnr2.grid(column=1, row=0, pady=10, sticky="w")
         btn1.grid(column=2, row=0, padx=20, pady=10, sticky="we")

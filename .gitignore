@@ -4,4 +4,4 @@
 xxx*
 *.exe
 src/main.dist/*
-src/nuitka.txt
+src/nuitka*

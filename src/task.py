@@ -72,26 +72,31 @@ class CsvTask(Task):
 
     def hrows(self):
         for hrow in self.fileHRows:
+            hrow["@MH@MF"] = ""
             if not hrow["EMAIL"]:
                 hrow["MITGLIEDSNR"] += " @H"
+                hrow["@MH@MF"] += "@H"
         for frow in self.fileFRows:
             if not frow["EMAIL"]:
                 hnr = toHNr(frow["MITGLIEDSNR"])
-                hrow = self.hmap[hnr]
+                hrow = self.hmap.get(hnr)
                 if not hrow:
-                    print("Kein Hauptmitglied für ", self.name(frow))
+                    print("Kein Hauptmitglied für ", name(frow))
                     continue
                 if "@F" not in hrow["MITGLIEDSNR"]:
                     hrow["MITGLIEDSNR"] += " @F"
+                    hrow["@MH@MF"] += "@F"
         return self.fileHRows
 
     def frows(self):
         for frow in self.fileFRows:
+            frow["@MH@MF"] = ""
             if not frow["EMAIL"]:
                 hnr = toHNr(frow["MITGLIEDSNR"])
-                hrow = self.hmap[hnr]
+                hrow = self.hmap.get(hnr)
                 if not hrow:
-                    print("Kein Hauptmitglied für ", self.name(frow))
+                    print("Kein Hauptmitglied für ", name(frow))
+                    frow["@MH@MF"] = "@HM-ERROR"
                     continue
                 if hrow["EMAIL"]:
                     frow["EMAIL2"] = hrow["EMAIL"]

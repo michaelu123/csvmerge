@@ -1,1 +1,1 @@
-nuitka -o dist --standalone --onefile --mingw64 --enable-plugin=tk-inter main.py 
+cd src; nuitka -o dist --standalone --onefile --mingw64 --enable-plugin=tk-inter --output-filename=mix_mh_mf.exe --windows-console-mode=disable main.py 
