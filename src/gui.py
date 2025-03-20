@@ -1,4 +1,5 @@
 import contextlib
+import os
 from tkinter import *
 from tkinter.filedialog import askopenfilename
 from tkinter.filedialog import asksaveasfilename
@@ -70,6 +71,14 @@ class Gui:
     def __init__(self, task):
         root = Tk()
         self.root = root
+        root.title("Weiterverarbeitung von Mitgliederdaten")
+        try:
+            # for nuitka, --include-data-files=adfc_icon.png=adfc_icon.png
+            # https://stackoverflow.com/questions/70363751/what-is-the-equivelant-of-add-data-pyinstaller-for-nuitka
+            filepath = os.path.join(os.path.dirname(__file__), 'adfc_icon.png')
+            root.iconphoto(False, PhotoImage(file=filepath))
+        except Exception as e:
+            print("Exception", e)
         self.task = task
         self.cont = False
         self.logName = "MIX_MH_MF"

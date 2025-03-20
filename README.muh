@@ -1,1 +1,1 @@
-cd src; nuitka -o dist --standalone --onefile --mingw64 --enable-plugin=tk-inter --output-filename=mix_mh_mf.exe --windows-console-mode=disable main.py 
+cd src; nuitka -o dist --standalone --onefile --mingw64 --enable-plugin=tk-inter --output-filename=mix_mh_mf.exe --windows-console-mode=disable --include-data-files=adfc_icon.png=adfc_icon.png main.py 
